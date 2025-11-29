@@ -1,1 +1,96 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>LigaPokémon — Registro</title>
+<style>
+body{background:#111;color:#eee;font-family:sans-serif;padding:20px;}
+h1{color:#4fc3f7;}
+#slots div{margin:4px 0;padding:6px;border:1px solid #333;background:#1a1a1a;width:240px;}
+button{background:#4fc3f7;border:none;padding:8px 12px;margin:4px;cursor:pointer;}
+input{padding:6px;margin:4px;}
+</style>
+</head>
+<body>
 
+<h1>LigaPokémon — Registro (1–38)</h1>
+
+<section id="sinopse">
+<h2>Sinopse da LigaPokémon</h2>
+<p>Liga Pokémon será um campeonato de Minecraft Pixelmon. Dependendo da quantidade de participantes, o prêmio pode chegar a até 200 reais. Ainda não sabemos se será em dupla ou individual. Os elementos serão sorteados futuramente. No final, o melhor mestre Pokémon vencerá!</p>
+</section>
+
+<h2>Participar</h2>
+<input id="nick" placeholder="Seu nick">
+<button onclick="join()">Participar</button>
+
+<h2>Lista</h2>
+<div id="slots"></div>
+
+<section id="admin" style="margin-top:40px;">
+<h2>Área do Administrador</h2>
+<input id="adminPass" type="password" placeholder="Senha">
+<button onclick="checkAdmin()">Entrar</button>
+<div id="adminPanel" style="display:none;margin-top:20px;">
+<button onclick="exportList()">Exportar Lista</button>
+<input type="file" id="importFile" onchange="importList(event)">
+<button onclick="clearList()">Limpar Tudo</button>
+</div>
+</section>
+
+<script>
+let list = Array(38).fill("");
+
+function render(){
+  const c=document.getElementById("slots");
+  c.innerHTML="";
+  list.forEach((n,i)=>{
+    const d=document.createElement("div");
+    d.textContent=(i+1)+". "+(n||"[vazio]");
+    c.appendChild(d);
+  });
+}
+
+function join(){
+  const name=document.getElementById("nick").value.trim();
+  if(!name) return alert("Digite um nome.");
+  if(localStorage.getItem("registeredName")) return alert("Você já se registrou.");
+  if(list.includes(name)) return alert("Nome já registrado.");
+  const idx=list.findIndex(e=>!e);
+  if(idx===-1) return alert("Sem vagas.");
+  list[idx]=name;
+  localStorage.setItem("registeredName",name);
+  render();
+}
+
+function exportList(){
+  const data=JSON.stringify(list);
+  const blob=new Blob([data],{type:"application/json"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download="lista.json";a.click();
+}
+
+function importList(e){
+  const file=e.target.files[0];
+  const r=new FileReader();
+  r.onload=()=>{ list=JSON.parse(r.result); render(); };
+  r.readAsText(file);
+}
+
+function clearList(){
+  if(confirm("Tem certeza?")){ list=Array(38).fill(""); render(); }
+}
+
+function checkAdmin(){
+  const p=document.getElementById("adminPass").value;
+  if(p==="heeitor08"){
+    document.getElementById("adminPanel").style.display="block";
+  } else alert("Senha incorreta");
+}
+
+render();
+</script>
+
+</body>
+</html>
